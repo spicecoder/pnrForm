@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grid Scaffold Demonstration</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .grid-container {
+      display: grid;
+      position: relative;
+      width: 300px;
+      height: 400px;
+      border: 1px solid #000;
+    }
+
+    .grid-item {
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid #ccc;
+    }
+
+    nav ul {
+      list-style: none;
+      padding: 10px;
+      margin: 0;
+      text-align: left;
+    }
+
+    nav ul li {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="grid-container" class="grid-container"></div>
+
+  <script>
+    // JSON schema representing the grid structure
+    const schema = {
+      layers: [
+        {
+          name: "MainLayer",
+          viewport: { width: 300, height: 400 },
+          cells: {
+            header: {
+              startX: 0,
+              startY: 0,
+              width: 1,
+              height: 0.1,
+              content: "HeaderComponent",
+              style: { backgroundColor: "#e3f2fd" }
+            },
+            sidebar: {
+              startX: 0,
+              startY: 0.1,
+              width: 0.3,
+              height: 0.9,
+              content: "SidebarComponent",
+              style: { backgroundColor: "#f5f5f5" }
+            },
+            main: {
+              startX: 0.3,
+              startY: 0.1,
+              width: 0.7,
+              height: 0.9,
+              content: "MainComponent",
+              style: { backgroundColor: "#ffffff" }
+            }
+          }
+        }
+      ]
+    };
+
+    // Components for rendering
+    class HeaderComponent {
+      render() {
+        return `<header>Header Content</header>`;
+      }
+    }
+
+    class SidebarComponent {
+      render() {
+        return `
+          <nav>
+            <ul>
+              <li>Item 1</li>
+              <li>Item 2</li>
+              <li>Item 3</li>
+            </ul>
+          </nav>
+        `;
+      }
+    }
+
+    class MainComponent {
+      render() {
+        return `<div style="text-align: center; background-color: cyan;">Main Content</div>`;
+      }
+    }
+
+    // Registry for components
+    const componentRegistry = {
+      HeaderComponent: new HeaderComponent(),
+      SidebarComponent: new SidebarComponent(),
+      MainComponent: new MainComponent()
+    };
+
+    // Class to render the grid
+    class GridRenderer {
+      constructor(containerId, schema) {
+        this.container = document.getElementById(containerId);
+        this.schema = schema;
+      }
+
+      render() {
+        const layer = this.schema.layers[0]; // Assuming a single layer for simplicity
+        const { viewport, cells } = layer;
+
+        // Set container dimensions
+        this.container.style.width = `${viewport.width}px`;
+        this.container.style.height = `${viewport.height}px`;
+
+        // Render each cell
+        for (const [cellName, cell] of Object.entries(cells)) {
+          const cellElement = document.createElement("div");
+          cellElement.className = "grid-item";
+          cellElement.style.left = `${cell.startX * 100}%`;
+          cellElement.style.top = `${cell.startY * 100}%`;
+          cellElement.style.width = `${cell.width * 100}%`;
+          cellElement.style.height = `${cell.height * 100}%`;
+          cellElement.style.backgroundColor = cell.style.backgroundColor;
+
+          // Render content
+          const content = componentRegistry[cell.content].render();
+          cellElement.innerHTML = content;
+
+          // Append to container
+          this.container.appendChild(cellElement);
+        }
+      }
+    }
+
+    // Initialize and render the grid
+    const gridRenderer = new GridRenderer("grid-container", schema);
+    gridRenderer.render();
+  </script>
+</body>
+</html>
